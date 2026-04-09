@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: crop-cure-backend
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ANTHROPIC_API_KEY
+        sync: false          # set manually in Render dashboard
+      - key: CORS_ORIGIN
+        sync: false          # e.g. https://yourapp.base44.app
