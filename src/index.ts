@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import scanRouter from "./routes/scan";
 import chatRouter from "./routes/chat";
+import feedbackRouter from "./routes/feedback";
 
 // Catch anything that slips through so Render always shows a log line
 process.on("uncaughtException", (err) => {
@@ -51,6 +52,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/scan", scanRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/feedback", feedbackRouter);
 
 const server = app.listen(PORT, () => {
   console.log(`CropCure backend running on port ${PORT}`);

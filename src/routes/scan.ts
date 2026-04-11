@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import Anthropic from "@anthropic-ai/sdk";
+import { getTopMisdiagnoses } from "../lib/feedbackStore";
 
 const router = Router();
 const client = new Anthropic(); // reads ANTHROPIC_API_KEY from env
@@ -9,7 +10,12 @@ type ImageMediaType = (typeof VALID_MEDIA_TYPES)[number];
 
 const SYSTEM_PROMPT = `You are an expert plant pathologist and agricultural scientist.
 Analyze crop photos for diseases, pests, or nutrient deficiencies.
-Always respond with valid JSON only — no markdown, no explanation outside the JSON object.`;
+Always respond with valid JSON only — no markdown, no explanation outside the JSON object.
+
+When diagnosing mildew, carefully distinguish between the two types:
+- Powdery mildew: white or grey powdery/dusty coating that appears ON TOP of (upper surface of) leaves. The powder can often be rubbed off. Affects the upper leaf surface primarily.
+- Downy mildew: yellow or pale green patches visible on the UPPER leaf surface, with grey, purple, or brown fuzzy/downy growth visible UNDERNEATH the leaf (lower surface). The fuzz is the sporangia growing on the underside.
+Before diagnosing either mildew type, determine which surface the growth is on and note the color and texture. If the image only shows one side of the leaf, consider whether the visible symptoms match the upper-surface or lower-surface pattern for each type.`;
 
 const USER_PROMPT = `Analyze this crop photo and identify any disease, pest damage, or nutrient deficiency present.
 
@@ -43,6 +49,13 @@ interface ScanResult {
   prevention: string[];
 }
 
+function buildSystemPrompt(): string {
+  const corrections = getTopMisdiagnoses(10);
+  if (corrections.length === 0) return SYSTEM_PROMPT;
+  const correctionBlock = corrections.map((m) => m.correction).join("\n");
+  return `${SYSTEM_PROMPT}\n\nPast user corrections — pay special attention to these known misdiagnoses:\n${correctionBlock}`;
+}
+
 router.post("/", async (req: Request, res: Response): Promise<void> => {
   const { image, mediaType = "image/jpeg" } = req.body as ScanRequest;
 
@@ -63,7 +76,7 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
     const message = await client.messages.create({
       model: "claude-sonnet-4-5",
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(),
       messages: [
         {
           role: "user",
