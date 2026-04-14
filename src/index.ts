@@ -31,16 +31,20 @@ console.log("ANTHROPIC_API_KEY: present");
 const app = express();
 const PORT = Number(process.env.PORT ?? 3000);
 
-// CORS — comma-separated origins in CORS_ORIGIN, or * for development
-const rawOrigins = process.env.CORS_ORIGIN ?? "*";
-const allowedOrigins = rawOrigins === "*" ? "*" : rawOrigins.split(",").map((o) => o.trim());
-console.log("CORS_ORIGIN:", rawOrigins);
+// CORS — always allow the production app origin; merge in CORS_ORIGIN env var if set
+const BASE_ORIGINS = ["https://crop-cure-flow.base44.app"];
+const rawOrigins = process.env.CORS_ORIGIN ?? "";
+const allowedOrigins =
+  rawOrigins === "*"
+    ? "*"
+    : [...BASE_ORIGINS, ...rawOrigins.split(",").map((o) => o.trim()).filter(Boolean)];
+console.log("CORS allowed origins:", allowedOrigins);
 
 app.use(
   cors({
     origin: allowedOrigins,
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Dev-Secret"],
   })
 );
 
