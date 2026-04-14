@@ -32,7 +32,7 @@ const app = express();
 const PORT = Number(process.env.PORT ?? 3000);
 
 // CORS — always allow the production app origin; merge in CORS_ORIGIN env var if set
-const BASE_ORIGINS = ["https://crop-cure-flow.base44.app"];
+const BASE_ORIGINS = ["https://crop-cure-flow.base44.app", "https://preview--crop-cure-flow.base44.app"];
 const rawOrigins = process.env.CORS_ORIGIN ?? "";
 const allowedOrigins =
   rawOrigins === "*"
