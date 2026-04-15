@@ -26,13 +26,19 @@ Respond with this exact JSON structure:
   "severity": "none" | "low" | "medium" | "high" | "critical",
   "affectedParts": ["list", "of", "affected", "plant", "parts"],
   "treatment": ["step 1", "step 2", "..."],
-  "prevention": ["advice 1", "advice 2", "..."]
+  "prevention": ["advice 1", "advice 2", "..."],
+  "needs_better_photo": <true if confidence is below 0.60, otherwise false>,
+  "photo_instructions": "specific guidance on what angle, surface, or lighting would help — e.g. 'Photograph the underside of the leaf to check for fuzzy growth' or 'Take the photo in natural daylight with the affected area filling the frame'. Empty string if needs_better_photo is false.",
+  "possible_diseases": ["top 2-3 candidate disease names when unsure, otherwise empty array"]
 }
 
 Rules:
 - confidence reflects how certain you are of the diagnosis
 - severity is "none" only when the plant is healthy
 - treatment and prevention must each have at least one item
+- needs_better_photo must be true whenever confidence < 0.60
+- photo_instructions must be a non-empty, specific string whenever needs_better_photo is true; tailor it to the suspected disease (e.g. ask for the leaf underside for mildew, close-up of lesion edges for blights, new growth for nutrient deficiencies)
+- possible_diseases should list 2-3 candidate names when needs_better_photo is true; empty array when confident
 - respond with raw JSON only, no code fences`;
 
 interface ScanRequest {
@@ -47,6 +53,9 @@ interface ScanResult {
   affectedParts: string[];
   treatment: string[];
   prevention: string[];
+  needs_better_photo: boolean;
+  photo_instructions: string;
+  possible_diseases: string[];
 }
 
 function buildSystemPrompt(): string {
