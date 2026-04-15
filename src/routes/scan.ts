@@ -121,7 +121,7 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
 
     let result: ScanResult;
     try {
-      result = JSON.parse(raw.text) as ScanResult;
+      result = JSON.parse(raw.text.replace(/```json|```/g, "").trim()) as ScanResult;
     } catch {
       res.status(502).json({ error: "Claude returned non-JSON output.", raw: raw.text });
       return;
