@@ -117,6 +117,8 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    console.log("[scan] raw AI response:", raw.text);
+
     let result: ScanResult;
     try {
       result = JSON.parse(raw.text) as ScanResult;
