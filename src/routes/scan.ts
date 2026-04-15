@@ -33,7 +33,11 @@ Respond with this exact JSON structure:
 }
 
 Rules:
-- confidence reflects how certain you are of the diagnosis
+- confidence is a number between 0 and 1 representing your genuine certainty — do NOT default to 0.85 or any fixed value. Assess each image independently using these bands:
+    • 0.90–1.00: Textbook-clear symptoms, single obvious diagnosis, high image quality, no ambiguity
+    • 0.70–0.89: Diagnosis is likely correct but some ambiguity exists (e.g. partial view, mild symptoms, slight blur)
+    • 0.50–0.69: Poor image quality, multiple plausible diseases, or symptoms are early/atypical
+    • 0.00–0.49: Very unclear image, heavily obscured symptoms, or too many competing diagnoses to distinguish
 - severity is "none" only when the plant is healthy
 - treatment and prevention must each have at least one item
 - needs_better_photo must be true whenever confidence < 0.60
